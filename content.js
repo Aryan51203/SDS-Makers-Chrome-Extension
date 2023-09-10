@@ -1,9 +1,8 @@
 function timerReset() {
     chrome.storage.local.get("SocialMediaTracker", (dG) => {
+        let today = new Date().toLocaleDateString(); // Getting today's date
 
-        let today = new Date().toLocaleDateString() // Getting today's date
-
-        dDictGot = dG["SocialMediaTracker"]
+        dDictGot = dG["SocialMediaTracker"];
         dDateGot = dDictGot["date"];
 
         if (dDateGot != today) {
@@ -12,49 +11,42 @@ function timerReset() {
             for (var key in dDictGot) {
                 dDictGot[key][1] = 0;
             }
-            chrome.storage.local.set({ "SocialMediaTracker": dDictGot });
-
+            chrome.storage.local.set({ SocialMediaTracker: dDictGot });
         }
     });
 }
 
 function fetchingDict(cDN) {
-
     chrome.storage.local.get("SocialMediaTracker", (dataGot) => {
         let d = dataGot["SocialMediaTracker"];
         console.log(d);
         usingFetchedDict(d);
-    })
-
+    });
 
     function usingFetchedDict(dictGot) {
         let webDictFetched = dictGot;
         let webArrFetched = webDictFetched[cDN];
 
         if (webArrFetched) {
-
             let limitSpecified = webArrFetched[0]; // in minutes
             let totalTime = webArrFetched[1]; // total time today
 
             limitSpecified = limitSpecified * 60; // Converting minutes to seconds
 
-            let todayDate = new Date().toLocaleDateString() // Setting today's date
+            let todayDate = new Date().toLocaleDateString(); // Setting today's date
             webDictFetched["date"] = todayDate;
 
             intervalID = setInterval(() => {
-
                 totalTime += 1;
 
                 webArrFetched[1] = totalTime;
 
                 webDictFetched[cDN] = webArrFetched;
 
-                chrome.storage.local.set({ "SocialMediaTracker": webDictFetched });
+                chrome.storage.local.set({ SocialMediaTracker: webDictFetched });
 
                 if (totalTime >= limitSpecified) {
-                    console.log('limit exceeded. Please close');
-                    
-
+                    console.log("limit exceeded. Please close");
 
                     document.querySelector("html").innerHTML = `<head>
                     <meta charset="UTF-8">
@@ -178,25 +170,19 @@ function fetchingDict(cDN) {
                     </div>
                 </body>
                 </html>`;
-                    
+
                     clearInterval(intervalID);
                 }
-
             }, 1000); // executes after every 1 second
-
         }
     }
 }
-
 
 function onLoadingWebPage() {
     let currentDomainName = window.location.hostname;
     console.log(currentDomainName);
     timerReset();
     fetchingDict(currentDomainName);
-
 }
-
-
 
 document.addEventListener("onload", onLoadingWebPage());
